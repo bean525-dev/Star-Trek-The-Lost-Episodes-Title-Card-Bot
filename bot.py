@@ -40,12 +40,15 @@ def create_card(series, title):
         "VOY": {
             "font": "fonts/handel.ttf", 
             "bg": "templates/VOY_bg.jpg",
-            "top_color": "#FF8C00",    # Deep Orange
-            "bottom_color": "#FFE0B2", # Peach
+            "top_color": "#FF8C00", 
+            "bottom_color": "#FFE0B2", 
             "shadow": False,
-            "size": 52,
-            "x_pos": 0.10, "y_pos": 0.15,
-            "align": "left", "anchor": "la", "wrap": 35
+            "size": 42,                # Dropped from 52 to 42 for safety
+            "x_pos": 0.08,             # Moved slightly more left (8%)
+            "y_pos": 0.12,             # Tucked higher into the corner
+            "align": "left", 
+            "anchor": "la", 
+            "wrap": 24                 # Lowered from 35 to prevent horizontal overflow
         }
     }
     
