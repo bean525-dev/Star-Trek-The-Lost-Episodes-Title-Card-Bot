@@ -11,46 +11,47 @@ import textwrap
 
 def create_card(series, title):
     # Base styles tuned to your specific templates
+    # Base styles tuned to your specific templates
     styles = {
         "TOS": {
             "font": "fonts/horizon.ttf", 
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow_color": "black",
-            "size": 100,
-            "x_pos": 0.95, # 95% across (Right Side)
-            "y_pos": 0.82, # 82% down
+            "size": 75,       # Reduced from 100
+            "x_pos": 0.92,    # Pulled slightly away from the far edge
+            "y_pos": 0.85, 
             "align": "right",
-            "anchor": "rd", # Right-Descender (anchors to bottom-right)
-            "wrap": 18
+            "anchor": "rd", 
+            "wrap": 22        # Increased so it doesn't stack too many lines
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
             "bg": "templates/DS9_bg.jpg",
-            "color": "#ADD8E6", # Light Blue/Silver
-            "shadow_color": "#00008B", # Dark Blue shadow
-            "size": 85,
-            "x_pos": 0.05, # 5% from left
-            "y_pos": 0.12, # 12% from top
+            "color": "#ADD8E6", 
+            "shadow_color": "#00008B", 
+            "size": 60,       # Reduced from 85
+            "x_pos": 0.08,    # 8% from left
+            "y_pos": 0.12, 
             "align": "left",
-            "anchor": "la", # Left-Ascender (anchors to top-left)
-            "wrap": 20
+            "anchor": "la", 
+            "wrap": 25        # Wider wrap for the top-left area
         },
         "TNG": {
-            "font": "fonts/TNG_credits.ttf", 
+            "font": "fonts/swiss.ttf", 
             "bg": "templates/TNG_bg.jpg",
             "color": "#cbd5e1", 
-            "size": 90,
+            "size": 70,       # Reduced from 90
             "x_pos": 0.5, "y_pos": 0.75,
-            "align": "center", "anchor": "mm", "wrap": 22
+            "align": "center", "anchor": "mm", "wrap": 28
         },
         "VOY": {
             "font": "fonts/handel.ttf", 
             "bg": "templates/VOY_bg.jpg",
             "color": "white", 
-            "size": 80,
+            "size": 65,       # Reduced from 80
             "x_pos": 0.5, "y_pos": 0.75,
-            "align": "center", "anchor": "mm", "wrap": 22
+            "align": "center", "anchor": "mm", "wrap": 28
         }
     }
     
