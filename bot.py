@@ -10,9 +10,10 @@ client.login(os.environ['BSKY_HANDLE'], os.environ['BSKY_PASSWORD'])
 def create_card(series, title):
     # Map series to your font/bg files
     styles = {
-        "VOY": {"font": "handel.ttf", "bg": "VOY_bg.jpg", "color": "white"},
-        "TNG": {"font": "swiss.ttf", "bg": "TNG_bg.jpg", "color": "#cbd5e1"},
-        "TOS": {"font": "horizon.ttf", "bg": "TOS_bg.jpg", "color": "yellow"}
+        "VOY": {"font": "handel.ttf", "bg": "VOY_bg.jpg", "color": "gold"},
+        "DS9": {"font": "handel.ttf", "bg": "DS9_bg.jpg", "color": "white"},
+        "TNG": {"font": "TNG_Credits", "bg": "TNG_bg.jpg", "color": "#cbd5e1"},
+        "TOS": {"font": "TOS_Title.ttf", "bg": "TOS_bg.jpg", "color": "yellow"}
     }
     s = styles.get(series, styles["TNG"])
     
