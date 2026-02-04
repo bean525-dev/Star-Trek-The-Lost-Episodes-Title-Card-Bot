@@ -1,16 +1,11 @@
-import re
 import os
+import re
+import textwrap
 from atproto import Client, models
 from PIL import Image, ImageDraw, ImageFont
 
-# 1. Login to Bluesky
-client = Client()
-client.login(os.environ['BSKY_HANDLE'], os.environ['BSKY_PASSWORD'])
-
-import textwrap
-
+# --- 1. IMAGE GENERATION LOGIC ---
 def create_card(series, title):
-    # Base styles tuned to your specific templates
     # Base styles tuned to your specific templates
     styles = {
         "TOS": {
@@ -18,30 +13,24 @@ def create_card(series, title):
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow_color": "black",
-            "size": 75,       # Reduced from 100
-            "x_pos": 0.92,    # Pulled slightly away from the far edge
-            "y_pos": 0.85, 
-            "align": "right",
-            "anchor": "rd", 
-            "wrap": 22        # Increased so it doesn't stack too many lines
+            "size": 75,
+            "x_pos": 0.92, "y_pos": 0.85,
+            "align": "right", "anchor": "rd", "wrap": 22
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
             "bg": "templates/DS9_bg.jpg",
             "color": "#ADD8E6", 
             "shadow_color": "#00008B", 
-            "size": 55,       # Dropped again for that "Little Green Men" feel
-            "x_pos": 0.08, 
-            "y_pos": 0.12, 
-            "align": "left",
-            "anchor": "la", 
-            "wrap": 35        # Much wider wrap to keep titles on fewer lines
+            "size": 55,
+            "x_pos": 0.08, "y_pos": 0.12,
+            "align": "left", "anchor": "la", "wrap": 35
         },
         "TNG": {
             "font": "fonts/swiss.ttf", 
             "bg": "templates/TNG_bg.jpg",
             "color": "#cbd5e1", 
-            "size": 70,       # Reduced from 90
+            "size": 70,
             "x_pos": 0.5, "y_pos": 0.75,
             "align": "center", "anchor": "mm", "wrap": 28
         },
@@ -49,104 +38,88 @@ def create_card(series, title):
             "font": "fonts/handel.ttf", 
             "bg": "templates/VOY_bg.jpg",
             "color": "white", 
-            "size": 65,       # Reduced from 80
+            "size": 65,
             "x_pos": 0.5, "y_pos": 0.75,
             "align": "center", "anchor": "mm", "wrap": 28
         }
     }
     
-    # Shields Up: Default to TNG if series isn't recognized
     s = styles.get(series, styles["TNG"])
     
-    # 1. Load Background Image
+    # Add quotes to the title automatically
+    quoted_title = f'"{title}"'
+
+    # Load Background
     try:
         img = Image.open(s["bg"])
     except FileNotFoundError:
-        print(f"❌ ERROR: Could not find background image at {s['bg']}")
-        return
+        print(f"❌ Could not find {s['bg']}")
+        return False
 
-    # 2. Setup Font and Dynamic Sizing
+    # Dynamic Shrink Logic
     font_size = s["size"]
-    
-    # --- SHRINK LOGIC STARTS HERE ---
-    # If the title is medium length, shrink it a bit
-    if len(title) > 15:
+    if len(quoted_title) > 15:
         font_size = int(s["size"] * 0.8)
-    
-    # If the title is very long (like your Odo example), shrink it a lot
-    if len(title) > 25:
+    if len(quoted_title) > 25:
         font_size = int(s["size"] * 0.6)
-    # --- SHRINK LOGIC ENDS HERE ---
     
     try:
         font = ImageFont.truetype(s["font"], font_size)
     except OSError:
-        print(f"❌ ERROR: Could not find font file at {s['font']}")
-        return
+        print(f"❌ Could not find {s['font']}")
+        return False
 
     draw = ImageDraw.Draw(img)
     W, H = img.size
-    
-    # Wrap text based on the style's width setting
-    wrapped_text = textwrap.fill(title, width=s["wrap"])
-    
-    # Calculate target position based on percentages
+    wrapped_text = textwrap.fill(quoted_title, width=s["wrap"])
     target_xy = (W * s["x_pos"], H * s["y_pos"])
 
-    # 3. Draw Shadow (offset by 4 pixels)
+    # Draw Shadow
     shadow_color = s.get("shadow_color", "black")
     shadow_xy = (target_xy[0] + 4, target_xy[1] + 4)
-    draw.multiline_text(
-        shadow_xy, wrapped_text, font=font, fill=shadow_color,
-        anchor=s["anchor"], align=s["align"], spacing=10
-    )
+    draw.multiline_text(shadow_xy, wrapped_text, font=font, fill=shadow_color, anchor=s["anchor"], align=s["align"], spacing=5)
 
-    # 4. Draw Main Text
-    draw.multiline_text(
-        target_xy, wrapped_text, font=font, fill=s["color"],
-        anchor=s["anchor"], align=s["align"], spacing=10
-    )
+    # Draw Main Text
+    draw.multiline_text(target_xy, wrapped_text, font=font, fill=s["color"], anchor=s["anchor"], align=s["align"], spacing=5)
 
     img.save("output.png")
+    return True
 
-# 2. Look for your latest post
-# We use a dictionary for the params which the SDK will handle automatically
-params = {
-    'actor': os.environ['BSKY_HANDLE'],
-    'limit': 5
-}
+# --- 2. BLUESKY INTERACTION ---
+def main():
+    client = Client()
+    client.login(os.environ['BSKY_HANDLE'], os.environ['BSKY_PASSWORD'])
 
-# Now we pass that dictionary into the function
-response = client.app.bsky.feed.get_author_feed(params=params)
+    params = {'actor': os.environ['BSKY_HANDLE'], 'limit': 5}
+    response = client.app.bsky.feed.get_author_feed(params=params)
 
-for feed_view in response.feed:
-    text = feed_view.post.record.text
-    # Regex to find: Tonight's Lost VOY Episode: "The Uprising"
-    match = re.search(r"Lost (\w+) Episode: \"(.+)\"", text)
-    
-    if match:
-        series, title = match.groups()
-        # Check if we already replied (simple check: does the post have replies?)
-        if feed_view.post.reply_count == 0:
-            create_card(series, title)
-            
-            # 3. Upload and Reply
-            with open("output.png", "rb") as f:
-                img_data = f.read()
-            
-            # Upload the image data to Bluesky
-            upload = client.upload_blob(img_data)
-            
-            # Create the reply reference
-            parent = {"cid": feed_view.post.cid, "uri": feed_view.post.uri}
-            root = feed_view.post.record.reply.root if feed_view.post.record.reply else parent
-            
-            # THE FIX: We use send_images (plural) or just pass the blob correctly
-            client.send_image(
-                text="", 
-                image=img_data, # Use the raw data here
-                image_alt=f"Star Trek {series} style title card for {title}",
-                reply_to=models.AppBskyFeedPost.ReplyRef(parent=parent, root=root)
-            )
-            print(f"Success! Replied to: {title}")
-            break
+    for feed_view in response.feed:
+        text = feed_view.post.record.text
+        # Regex to find: Tonight's Lost VOY Episode: "The Uprising"
+        match = re.search(r"Lost (\w+) Episode: \"(.+)\"", text)
+        
+        if match:
+            series = match.group(1)
+            title = match.group(2)
+            print(f"Found: {series} - {title}")
+
+            # Generate the image
+            if create_card(series, title):
+                # Upload and Reply
+                with open("output.png", "rb") as f:
+                    img_data = f.read()
+                
+                parent = {"cid": feed_view.post.cid, "uri": feed_view.post.uri}
+                root = feed_view.post.record.reply.root if feed_view.post.record.reply else parent
+                
+                client.send_image(
+                    text="", 
+                    image=img_data, 
+                    image_alt=f"Star Trek {series} style title card for {title}",
+                    reply_to=models.AppBskyFeedPost.ReplyRef(parent=parent, root=root)
+                )
+                print("Successfully replied with title card!")
+                break
+
+if __name__ == "__main__":
+    main()
