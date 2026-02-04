@@ -37,15 +37,18 @@ def create_card(series, title):
             "x_pos": 0.12, "y_pos": 0.15,
             "align": "left", "anchor": "la", "wrap": 28
         },
-        "VOY": {
+  "VOY": {
             "font": "fonts/handel.ttf", 
             "bg": "templates/VOY_bg.jpg",
             "top_color": "#FF8C00",    # Deep Orange
             "bottom_color": "#FFE0B2", # Peach
             "shadow": False,
-            "size": 60,
-            "x_pos": 0.5, "y_pos": 0.18,
-            "align": "center", "anchor": "ma", "wrap": 30
+            "size": 52,                # Reduced from 60 for a sleeker look
+            "x_pos": 0.10,             # Moved to the left (10% from edge)
+            "y_pos": 0.15,             # Positioned in the top section
+            "align": "left",           # Text aligns to the left
+            "anchor": "la",            # Left-Ascender (top-left anchor)
+            "wrap": 35                 # Wider wrap to keep it on fewer lines
         }
     }
     
