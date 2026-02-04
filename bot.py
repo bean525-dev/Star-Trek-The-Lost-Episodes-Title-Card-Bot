@@ -7,23 +7,54 @@ from PIL import Image, ImageDraw, ImageFont
 client = Client()
 client.login(os.environ['BSKY_HANDLE'], os.environ['BSKY_PASSWORD'])
 
+import textwrap
+
 def create_card(series, title):
-    # Map series to your font/bg files
+    # Base styles tuned to your templates
     styles = {
-        "VOY": {"font": "fonts/handel.ttf", "bg": "templates/VOY_bg.jpg", "color": "gld"},
-        "DS9": {"font": "fonts/handel.ttf", "bg": "templates/DS9_bg.jpg", "color": "white"},
-        "TNG": {"font": "fonts/TNG_Credits", "bg": "templates/TNG_bg.jpg", "color": "#cbd5e1"},
-        "TOS": {"font": "fonts/TOS_Title.ttf", "bg": "templates/TOS_bg.jpg", "color": "yellow"}
+        "TOS": {
+            "font": "fonts/horizon.ttf", 
+            "color": "yellow", 
+            "size": 100,
+            "x_pos": 0.95, # 95% across (Right Side)
+            "y_pos": 0.82, # 82% down
+            "align": "right",
+            "anchor": "rd", # Right-Descender (bottom-right)
+            "wrap": 18
+        },
+        # You can add similar custom positioning for TNG/VOY later
     }
-    s = styles.get(series, styles["TNG"])
     
-    img = Image.open(s["bg"])
+    s = styles.get(series, styles["TOS"]) # Default to TOS style
+    img = Image.open(f"templates/{series}_bg.jpg")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(s["font"], 120)
+    W, H = img.size
+
+    # 1. HANDLE LONG TITLES (Shrink if needed)
+    font_size = s["size"]
+    if len(title) > 20:
+        font_size = int(s["size"] * 0.75) # Shrink to 75% size
     
-    # Draw text centered in the bottom third
-    w, h = img.size
-    draw.text((w/2, h*0.75), title, fill=s["color"], font=font, anchor="mm")
+    font = ImageFont.truetype(s["font"], font_size)
+    wrapped_text = textwrap.fill(title, width=s["wrap"])
+
+    # Target position based on the percentages above
+    target_xy = (W * s["x_pos"], H * s["y_pos"])
+
+    # 2. DRAW DROP SHADOW (The secret to the "Pro" look)
+    # Draw black text first, shifted 5 pixels down and right
+    shadow_xy = (target_xy[0] + 5, target_xy[1] + 5)
+    draw.multiline_text(
+        shadow_xy, wrapped_text, font=font, fill="black",
+        anchor=s["anchor"], align=s["align"], spacing=10
+    )
+
+    # 3. DRAW MAIN TEXT
+    draw.multiline_text(
+        target_xy, wrapped_text, font=font, fill=s["color"],
+        anchor=s["anchor"], align=s["align"], spacing=10
+    )
+
     img.save("output.png")
 
 # 2. Look for your latest post
