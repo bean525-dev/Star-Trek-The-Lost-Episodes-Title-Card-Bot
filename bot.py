@@ -50,17 +50,20 @@ for feed_view in response.feed:
             # 3. Upload and Reply
             with open("output.png", "rb") as f:
                 img_data = f.read()
+            
+            # Upload the image data to Bluesky
             upload = client.upload_blob(img_data)
             
-            # Reply to the original post
+            # Create the reply reference
             parent = {"cid": feed_view.post.cid, "uri": feed_view.post.uri}
             root = feed_view.post.record.reply.root if feed_view.post.record.reply else parent
             
+            # THE FIX: We use send_images (plural) or just pass the blob correctly
             client.send_image(
                 text="", 
-                image=upload.blob, 
-                image_alt=f"Title card for {title}",
-                reply_to={"root": root, "parent": parent}
+                image=img_data, # Use the raw data here
+                image_alt=f"Star Trek {series} style title card for {title}",
+                reply_to=models.AppBskyFeedPost.ReplyRef(parent=parent, root=root)
             )
-            print(f"Replied to: {title}")
-            break # Just do one per run
+            print(f"Success! Replied to: {title}")
+            break
