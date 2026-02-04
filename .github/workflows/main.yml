@@ -22,3 +22,4 @@ jobs:
           BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
           BSKY_PASSWORD: ${{ secrets.BSKY_PASSWORD }}
         run: python bot.py
+        
