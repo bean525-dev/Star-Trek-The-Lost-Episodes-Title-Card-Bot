@@ -10,46 +10,90 @@ client.login(os.environ['BSKY_HANDLE'], os.environ['BSKY_PASSWORD'])
 import textwrap
 
 def create_card(series, title):
-    # Base styles tuned to your templates
+    # Base styles tuned to your specific templates
     styles = {
         "TOS": {
             "font": "fonts/horizon.ttf", 
+            "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
+            "shadow_color": "black",
             "size": 100,
             "x_pos": 0.95, # 95% across (Right Side)
             "y_pos": 0.82, # 82% down
             "align": "right",
-            "anchor": "rd", # Right-Descender (bottom-right)
+            "anchor": "rd", # Right-Descender (anchors to bottom-right)
             "wrap": 18
         },
-        # You can add similar custom positioning for TNG/VOY later
+        "DS9": {
+            "font": "fonts/handel.ttf", 
+            "bg": "templates/DS9_bg.jpg",
+            "color": "#ADD8E6", # Light Blue/Silver
+            "shadow_color": "#00008B", # Dark Blue shadow
+            "size": 85,
+            "x_pos": 0.05, # 5% from left
+            "y_pos": 0.12, # 12% from top
+            "align": "left",
+            "anchor": "la", # Left-Ascender (anchors to top-left)
+            "wrap": 20
+        },
+        "TNG": {
+            "font": "fonts/TNG_credits.ttf", 
+            "bg": "templates/TNG_bg.jpg",
+            "color": "#cbd5e1", 
+            "size": 90,
+            "x_pos": 0.5, "y_pos": 0.75,
+            "align": "center", "anchor": "mm", "wrap": 22
+        },
+        "VOY": {
+            "font": "fonts/handel.ttf", 
+            "bg": "templates/VOY_bg.jpg",
+            "color": "white", 
+            "size": 80,
+            "x_pos": 0.5, "y_pos": 0.75,
+            "align": "center", "anchor": "mm", "wrap": 22
+        }
     }
     
-    s = styles.get(series, styles["TOS"]) # Default to TOS style
-    img = Image.open(f"templates/{series}_bg.jpg")
+    # Shields Up: Default to TNG if series isn't recognized
+    s = styles.get(series, styles["TNG"])
+    
+    # 1. Load Background Image
+    try:
+        img = Image.open(s["bg"])
+    except FileNotFoundError:
+        print(f"❌ ERROR: Could not find background image at {s['bg']}")
+        return
+
+    # 2. Setup Font and Dynamic Sizing
+    font_size = s["size"]
+    # Shrink font slightly for very long titles to prevent clipping
+    if len(title) > 25:
+        font_size = int(s["size"] * 0.8)
+    
+    try:
+        font = ImageFont.truetype(s["font"], font_size)
+    except OSError:
+        print(f"❌ ERROR: Could not find font file at {s['font']}")
+        return
+
     draw = ImageDraw.Draw(img)
     W, H = img.size
-
-    # 1. HANDLE LONG TITLES (Shrink if needed)
-    font_size = s["size"]
-    if len(title) > 20:
-        font_size = int(s["size"] * 0.75) # Shrink to 75% size
     
-    font = ImageFont.truetype(s["font"], font_size)
+    # Wrap text based on the style's width setting
     wrapped_text = textwrap.fill(title, width=s["wrap"])
-
-    # Target position based on the percentages above
+    
+    # Calculate target position based on percentages
     target_xy = (W * s["x_pos"], H * s["y_pos"])
 
-    # 2. DRAW DROP SHADOW (The secret to the "Pro" look)
-    # Draw black text first, shifted 5 pixels down and right
-    shadow_xy = (target_xy[0] + 5, target_xy[1] + 5)
+    # 3. Draw Shadow (offset by 4 pixels)
+    shadow_color = s.get("shadow_color", "black")
+    shadow_xy = (target_xy[0] + 4, target_xy[1] + 4)
     draw.multiline_text(
-        shadow_xy, wrapped_text, font=font, fill="black",
+        shadow_xy, wrapped_text, font=font, fill=shadow_color,
         anchor=s["anchor"], align=s["align"], spacing=10
     )
 
-    # 3. DRAW MAIN TEXT
+    # 4. Draw Main Text
     draw.multiline_text(
         target_xy, wrapped_text, font=font, fill=s["color"],
         anchor=s["anchor"], align=s["align"], spacing=10
