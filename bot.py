@@ -37,34 +37,33 @@ def create_card(series, title):
             "x_pos": 0.12, "y_pos": 0.15,
             "align": "left", "anchor": "la", "wrap": 28
         },
-  "VOY": {
+        "VOY": {
             "font": "fonts/handel.ttf", 
             "bg": "templates/VOY_bg.jpg",
             "top_color": "#FF8C00",    # Deep Orange
             "bottom_color": "#FFE0B2", # Peach
             "shadow": False,
-            "size": 52,                # Reduced from 60 for a sleeker look
-            "x_pos": 0.10,             # Moved to the left (10% from edge)
-            "y_pos": 0.15,             # Positioned in the top section
-            "align": "left",           # Text aligns to the left
-            "anchor": "la",            # Left-Ascender (top-left anchor)
-            "wrap": 35                 # Wider wrap to keep it on fewer lines
+            "size": 52,
+            "x_pos": 0.10, "y_pos": 0.15,
+            "align": "left", "anchor": "la", "wrap": 35
         }
     }
     
     s = styles.get(series, styles["TNG"])
     
-    # Add quotes to the title automatically
+    # Add quotes and handle case sensitivity
     quoted_title = f'"{title}"'
+    if series in ["TOS", "DS9", "VOY"]:
+        quoted_title = quoted_title.upper()
 
-    # Load Background as RGBA for proper gradient blending
+    # Load Background as RGBA for gradient blending
     try:
         img = Image.open(s["bg"]).convert("RGBA")
     except FileNotFoundError:
         print(f"❌ Could not find {s['bg']}")
         return False
 
-    # Dynamic Shrink Logic
+    # Dynamic Sizing
     font_size = s["size"]
     if len(quoted_title) > 15:
         font_size = int(s["size"] * 0.8)
@@ -84,46 +83,39 @@ def create_card(series, title):
 
     # --- DRAWING PHASE ---
 
-    # 1. Draw Shadow ONLY for TOS (or if explicitly enabled)
+    # 1. Draw Shadow (TOS only)
     if s.get("shadow", False):
         sha_color = s.get("shadow_color", "black")
         draw.multiline_text((target_xy[0]+3, target_xy[1]+3), wrapped_text, font=font, fill=sha_color, anchor=s["anchor"], align=s["align"], spacing=5)
 
-    # 2. Draw Main Text (Gradient for DS9/VOY, Solid for others)
+    # 2. Draw Text (Gradient for DS9/VOY, Solid for others)
     if "top_color" in s:
-        # Create a mask of the text
         mask = Image.new("L", (W, H), 0)
         mask_draw = ImageDraw.Draw(mask)
         mask_draw.multiline_text(target_xy, wrapped_text, font=font, fill=255, anchor=s["anchor"], align=s["align"], spacing=5)
         
-        # Determine text boundaries for the gradient
         bbox = mask_draw.multiline_textbbox(target_xy, wrapped_text, font=font, anchor=s["anchor"], align=s["align"])
         
-        # Create the vertical color fade
         gradient = Image.new("RGBA", (W, H), (0,0,0,0))
         grad_draw = ImageDraw.Draw(gradient)
         
         y_start, y_end = int(bbox[1]), int(bbox[3])
-        height = y_end - y_start
+        height = max(1, y_end - y_start)
         
-        # Convert hex to RGB
         c1 = tuple(int(s["top_color"].lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
         c2 = tuple(int(s["bottom_color"].lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
 
         for y in range(y_start, y_end + 1):
-            curr_y = (y - y_start) / max(1, height)
+            curr_y = (y - y_start) / height
             r = int(c1[0] + (c2[0] - c1[0]) * curr_y)
             g = int(c1[1] + (c2[1] - c1[1]) * curr_y)
             b = int(c1[2] + (c2[2] - c1[2]) * curr_y)
             grad_draw.line([(bbox[0], y), (bbox[2], y)], fill=(r, g, b, 255))
 
-        # Composite the gradient onto image using the text mask
         img.paste(gradient, (0, 0), mask)
     else:
-        # Solid Color path
         draw.multiline_text(target_xy, wrapped_text, font=font, fill=s["color"], anchor=s["anchor"], align=s["align"], spacing=5)
 
-    # Final save (Convert back to RGB to remove alpha channel)
     img.convert("RGB").save("output.png")
     return True
 
@@ -137,7 +129,6 @@ def main():
 
     for feed_view in response.feed:
         text = feed_view.post.record.text
-        # Regex to find the pattern
         match = re.search(r"Lost (\w+) Episode: \"(.+)\"", text)
         
         if match:
