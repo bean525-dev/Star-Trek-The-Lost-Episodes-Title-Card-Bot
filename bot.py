@@ -10,10 +10,10 @@ client.login(os.environ['BSKY_HANDLE'], os.environ['BSKY_PASSWORD'])
 def create_card(series, title):
     # Map series to your font/bg files
     styles = {
-        "VOY": {"font": "handel.ttf", "bg": "VOY_bg.jpg", "color": "gold"},
-        "DS9": {"font": "handel.ttf", "bg": "DS9_bg.jpg", "color": "white"},
-        "TNG": {"font": "TNG_Credits", "bg": "TNG_bg.jpg", "color": "#cbd5e1"},
-        "TOS": {"font": "TOS_Title.ttf", "bg": "TOS_bg.jpg", "color": "yellow"}
+        "VOY": {"font": "fonts/handel.ttf", "bg": "templates/VOY_bg.jpg", "color": "gld"},
+        "DS9": {"font": "fonts/handel.ttf", "bg": "templates/DS9_bg.jpg", "color": "white"},
+        "TNG": {"font": "fonts/TNG_Credits", "bg": "/templates/TNG_bg.jpg", "color": "#cbd5e1"},
+        "TOS": {"font": "fonts/TOS_Title.ttf", "bg": "/templates/TOS_bg.jpg", "color": "yellow"}
     }
     s = styles.get(series, styles["TNG"])
     
@@ -27,9 +27,14 @@ def create_card(series, title):
     img.save("output.png")
 
 # 2. Look for your latest post
-# Replace 'YOUR_BOT_DID' with your bot's actual DID or handle
-params = {'repo': os.environ['BSKY_HANDLE'], 'collection': 'app.bsky.feed.post', 'limit': 5}
-response = client.app.bsky.feed.get_author_feed(actor=os.environ['BSKY_HANDLE'])
+# We use a dictionary for the params which the SDK will handle automatically
+params = {
+    'actor': os.environ['BSKY_HANDLE'],
+    'limit': 5
+}
+
+# Now we pass that dictionary into the function
+response = client.app.bsky.feed.get_author_feed(params=params)
 
 for feed_view in response.feed:
     text = feed_view.post.record.text
