@@ -30,12 +30,12 @@ def create_card(series, title):
             "bg": "templates/DS9_bg.jpg",
             "color": "#ADD8E6", 
             "shadow_color": "#00008B", 
-            "size": 60,       # Reduced from 85
-            "x_pos": 0.08,    # 8% from left
+            "size": 55,       # Dropped again for that "Little Green Men" feel
+            "x_pos": 0.08, 
             "y_pos": 0.12, 
             "align": "left",
             "anchor": "la", 
-            "wrap": 25        # Wider wrap for the top-left area
+            "wrap": 35        # Much wider wrap to keep titles on fewer lines
         },
         "TNG": {
             "font": "fonts/swiss.ttf", 
@@ -67,9 +67,16 @@ def create_card(series, title):
 
     # 2. Setup Font and Dynamic Sizing
     font_size = s["size"]
-    # Shrink font slightly for very long titles to prevent clipping
-    if len(title) > 25:
+    
+    # --- SHRINK LOGIC STARTS HERE ---
+    # If the title is medium length, shrink it a bit
+    if len(title) > 15:
         font_size = int(s["size"] * 0.8)
+    
+    # If the title is very long (like your Odo example), shrink it a lot
+    if len(title) > 25:
+        font_size = int(s["size"] * 0.6)
+    # --- SHRINK LOGIC ENDS HERE ---
     
     try:
         font = ImageFont.truetype(s["font"], font_size)
