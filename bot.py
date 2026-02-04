@@ -27,7 +27,7 @@ def create_card(series, title):
             "align": "left", "anchor": "la", "wrap": 35
         },
         "TNG": {
-            "font": "fonts/swiss.ttf", 
+            "font": "fonts/TNG_Credits.ttf", 
             "bg": "templates/TNG_bg.jpg",
             "color": "#cbd5e1", 
             "size": 70,
