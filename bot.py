@@ -12,8 +12,8 @@ def create_card(series, title):
     styles = {
         "VOY": {"font": "fonts/handel.ttf", "bg": "templates/VOY_bg.jpg", "color": "gld"},
         "DS9": {"font": "fonts/handel.ttf", "bg": "templates/DS9_bg.jpg", "color": "white"},
-        "TNG": {"font": "fonts/TNG_Credits", "bg": "/templates/TNG_bg.jpg", "color": "#cbd5e1"},
-        "TOS": {"font": "fonts/TOS_Title.ttf", "bg": "/templates/TOS_bg.jpg", "color": "yellow"}
+        "TNG": {"font": "fonts/TNG_Credits", "bg": "templates/TNG_bg.jpg", "color": "#cbd5e1"},
+        "TOS": {"font": "fonts/TOS_Title.ttf", "bg": "templates/TOS_bg.jpg", "color": "yellow"}
     }
     s = styles.get(series, styles["TNG"])
     
