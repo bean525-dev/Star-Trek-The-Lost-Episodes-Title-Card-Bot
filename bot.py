@@ -70,8 +70,10 @@ def create_card(series, title):
     font_size = s["size"]
     if len(quoted_title) > 15:
         font_size = int(s["size"] * 0.8)
-    if len(quoted_title) > 25:
-        font_size = int(s["size"] * 0.6)
+    if len(quoted_title) > 20:          # Lowered threshold from 25
+        font_size = int(s["size"] * 0.75)
+    if len(quoted_title) > 35:          # New third tier for ultra-long titles
+        font_size = int(s["size"] * 0.55)
     
     try:
         font = ImageFont.truetype(s["font"], font_size)
