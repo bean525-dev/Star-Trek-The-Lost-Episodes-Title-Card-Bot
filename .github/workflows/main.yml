@@ -1,0 +1,22 @@
+name: Trek Title Card Bot
+on:
+  schedule:
+    - cron: '*/60 * * * *' # Runs every 60 minutes
+  workflow_dispatch: # Allows you to run it manually to test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install atproto Pillow
+      - name: Run bot
+        env:
+          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
+          BSKY_PASSWORD: ${{ secrets.BSKY_PASSWORD }}
+        run: python bot.py
