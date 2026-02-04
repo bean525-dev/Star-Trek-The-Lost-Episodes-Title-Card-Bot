@@ -1,6 +1,6 @@
 import re
 import os
-from atproto import Client
+from atproto import Client, models
 from PIL import Image, ImageDraw, ImageFont
 
 # 1. Login to Bluesky
