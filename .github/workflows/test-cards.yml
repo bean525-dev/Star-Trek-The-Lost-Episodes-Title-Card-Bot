@@ -1,0 +1,33 @@
+name: Test Title Card Placement
+on: [workflow_dispatch] # This adds the "Run" button
+
+jobs:
+  test_render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install Pillow atproto
+      - name: Run Test Renders
+        run: |
+          python -c '
+          from bot import create_card
+          import os
+          tests = [("TOS", "The City on the Edge of Forever"), 
+                   ("TNG", "Yesterday s Enterprise"), 
+                   ("DS9", "In the Pale Moonlight"), 
+                   ("VOY", "Scorpion")]
+          for s, t in tests:
+              if create_card(s, t):
+                  os.rename("output.png", f"test_{s}.png")
+          '
+      - name: Upload Previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: style-previews
+          path: test_*.png
