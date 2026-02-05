@@ -13,10 +13,10 @@ def create_card(series, title):
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
             "size": 100, 
-            "x_start": 0.12, "y_start": 0.20, # Higher and further left to start
-            "indent_px": 250,                  # Large shift right for the second line
-            "line_spacing": 40,               # Space between the two blocks
-            "wrap_width": 15                  # Characters per line
+            "x_start": 0.25, "y_start": 0.15, # Moved further right and higher up
+            "indent_px": 180,                  # Slightly tighter stagger to stay on screen
+            "line_spacing": 30, 
+            "wrap_width": 20                  # Increased to encourage a 2-line split
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
@@ -52,7 +52,6 @@ def create_card(series, title):
         img = Image.open(s["bg"]).convert("RGBA")
     except FileNotFoundError: return False
 
-    # Dynamic Sizing
     font_size = s["size"]
     if len(quoted_title) > 25: font_size = int(s["size"] * 0.70)
     
@@ -66,8 +65,9 @@ def create_card(series, title):
     # --- DRAWING PHASE ---
 
     if series == "TOS":
-        # Wrap into 2 or 3 lines max
+        # Strategy: Use textwrap but keep width wide to aim for 2 lines.
         wrapped_lines = textwrap.wrap(quoted_title, width=s["wrap_width"])
+        
         current_x = W * s["x_start"]
         current_y = H * s["y_start"]
         
@@ -77,14 +77,13 @@ def create_card(series, title):
             # Draw Main Text
             draw.text((current_x, current_y), line, font=font, fill=s["color"], anchor="la")
             
-            # Get height of this line to move down for the next one
             bbox = draw.textbbox((current_x, current_y), line, font=font, anchor="la")
             line_height = bbox[3] - bbox[1]
             
             current_y += line_height + s["line_spacing"]
             current_x += s["indent_px"]
             
-    elif "top_color" in s: # DS9 / VOY Gradient Logic
+    elif "top_color" in s:
         wrapped_text = textwrap.fill(quoted_title, width=s["wrap"])
         target_xy = (W * s["x_pos"], H * s["y_pos"])
         lines = wrapped_text.split('\n')
@@ -115,7 +114,6 @@ def create_card(series, title):
             img.paste(line_grad, (0, 0), line_mask)
             current_y += (y_end - y_start) + line_spacing
     else:
-        # TNG Solid Color path
         wrapped_text = textwrap.fill(quoted_title, width=s["wrap"])
         target_xy = (W * s["x_pos"], H * s["y_pos"])
         draw.multiline_text(target_xy, wrapped_text, font=font, fill=s["color"], anchor=s["anchor"], align=s["align"], spacing=5)
