@@ -12,8 +12,8 @@ def create_card(series, title):
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
-            "size": 100, "x_pos": 0.5, "y_pos": 0.35,
-            "align": "center", "anchor": "mm", "wrap": 12
+            "size": 90, "x_pos": 0.25, "y_pos": 0.25,
+            "align": "left", "anchor": "la", "wrap": 10
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
@@ -64,11 +64,35 @@ def create_card(series, title):
 
     # --- DRAWING PHASE ---
 
-    # 1. Draw Shadow (TOS only)
-    if s.get("shadow", False):
+    # 1. Draw Shadow (Skip for TOS, we handle it below)
+    if s.get("shadow", False) and series != "TOS":
         sha_color = s.get("shadow_color", "black")
         draw.multiline_text((target_xy[0]+3, target_xy[1]+3), wrapped_text, font=font, fill=sha_color, anchor=s["anchor"], align=s["align"], spacing=5)
 
+    # 2. Draw Text (Line-by-line Gradient for DS9/VOY)
+    if "top_color" in s:
+        # ... (Keep your existing DS9/VOY gradient logic here) ...
+        # ... it ends where the 'else:' starts ...
+    else:
+        # Solid Color path
+        if series == "TOS":
+            lines = wrapped_text.split('\n')
+            curr_x, curr_y = target_xy
+            for i, line in enumerate(lines):
+                # Indent each line 100 pixels further than the last
+                line_x = curr_x + (i * 100) 
+                
+                # Draw TOS Shadow manually
+                draw.text((line_x + 5, curr_y + 5), line, font=font, fill="black", anchor=s["anchor"])
+                
+                # Draw TOS Main Text
+                draw.text((line_x, curr_y), line, font=font, fill=s["color"], anchor=s["anchor"])
+                
+                # Move down for next line (font_size + small gap)
+                curr_y += font_size + 10
+        else:
+            # Standard path for TNG and others
+            draw.multiline_text(target_xy, wrapped_text, font=font, fill=s["color"], anchor=s["anchor"], align=s["align"], spacing=5)
     # 2. Draw Text (Line-by-line Gradient for DS9/VOY)
     if "top_color" in s:
         lines = wrapped_text.split('\n')
