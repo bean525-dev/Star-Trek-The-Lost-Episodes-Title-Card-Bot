@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 def create_card(series, title):
     styles = {
         "TOS": {
-            "font": "fonts/horizon.ttf", 
+            "font": "fonts/TOS_Title.ttf", 
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
