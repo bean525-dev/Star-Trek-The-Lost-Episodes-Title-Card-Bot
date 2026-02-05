@@ -2,8 +2,8 @@ name: Trek Title Card Bot
 
 on:
   schedule:
-    # This runs at minute 13 of every hour
-    - cron: '13 * * * *'
+    # This runs at minute 47 of every hour
+    - cron: '47 * * * *'
   workflow_dispatch: # This allows you to also run it manually whenever you want
 
 jobs:
