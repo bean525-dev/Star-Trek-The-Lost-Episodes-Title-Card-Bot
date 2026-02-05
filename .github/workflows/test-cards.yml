@@ -19,7 +19,7 @@ jobs:
           from bot import create_card
           import os
           tests = [("TOS", "The City on the Edge of Forever"), 
-                   ("TNG", "Yesterday s Enterprise"), 
+                   ("TNG", "Yesterday's Enterprise"), 
                    ("DS9", "In the Pale Moonlight"), 
                    ("VOY", "Scorpion")]
           for s, t in tests:
