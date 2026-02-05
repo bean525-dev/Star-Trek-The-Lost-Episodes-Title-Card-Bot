@@ -12,7 +12,7 @@ def create_card(series, title):
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
-            "size": 75, "x_pos": 0.92, "y_pos": 0.85,
+            "size": 40, "x_pos": 0.92, "y_pos": 0.85,
             "align": "right", "anchor": "rd", "wrap": 22
         },
         "DS9": {
@@ -20,14 +20,14 @@ def create_card(series, title):
             "bg": "templates/DS9_bg.jpg",
             "top_color": "#e0e0e0", "bottom_color": "#7da6ff", 
             "shadow": False,
-            "size": 55, "x_pos": 0.08, "y_pos": 0.12,
+            "size": 42, "x_pos": 0.08, "y_pos": 0.12,
             "align": "left", "anchor": "la", "wrap": 30
         },
         "TNG": {
             "font": "fonts/TNG_Credits.ttf", 
             "bg": "templates/TNG_bg.jpg",
             "color": "#5286ff", "shadow": False,
-            "size": 65, "x_pos": 0.12, "y_pos": 0.15,
+            "size": 42, "x_pos": 0.12, "y_pos": 0.15,
             "align": "left", "anchor": "la", "wrap": 28
         },
         "VOY": {
@@ -36,7 +36,7 @@ def create_card(series, title):
             "top_color": "#FF8C00", "bottom_color": "#FFE0B2", 
             "shadow": False,
             "size": 42, "x_pos": 0.07, "y_pos": 0.10,
-            "align": "left", "anchor": "la", "wrap": 20
+            "align": "left", "anchor": "la", "wrap": 28
         }
     }
     
