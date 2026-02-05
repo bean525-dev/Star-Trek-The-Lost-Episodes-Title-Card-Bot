@@ -12,8 +12,8 @@ def create_card(series, title):
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
-            "size": 40, "x_pos": 0.92, "y_pos": 0.85,
-            "align": "right", "anchor": "rd", "wrap": 22
+            "size": 100, "x_pos": 0.5, "y_pos": 0.35,
+            "align": "center", "anchor": "mm", "wrap": 12
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
