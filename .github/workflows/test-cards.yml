@@ -15,7 +15,7 @@ jobs:
           pip install Pillow atproto
       - name: Run Test Renders
         run: |
-          python -c '
+          python - <<EOF
           from bot import create_card
           import os
           tests = [("TOS", "The City on the Edge of Forever"), 
@@ -25,7 +25,7 @@ jobs:
           for s, t in tests:
               if create_card(s, t):
                   os.rename("output.png", f"test_{s}.png")
-          '
+          EOF
       - name: Upload Previews
         uses: actions/upload-artifact@v4
         with:
