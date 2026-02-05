@@ -45,9 +45,29 @@ def create_card(series, title):
     if series in ["TOS", "DS9", "VOY"]:
         quoted_title = quoted_title.upper()
 
+    # Check if background exists
+    if not os.path.exists(s["bg"]):
+        print(f"!!! Error: Background not found at {s['bg']}")
+        return False
+
     try:
         img = Image.open(s["bg"]).convert("RGBA")
-    except FileNotFoundError: return False
+    except Exception as e:
+        print(f"!!! Error opening image: {e}")
+        return False
+
+    font_size = s["size"]
+    
+    # Check if font exists
+    if not os.path.exists(s["font"]):
+        print(f"!!! Error: Font not found at {s['font']}. Check case-sensitivity!")
+        return False
+    
+    try:
+        font = ImageFont.truetype(s["font"], font_size)
+    except Exception as e:
+        print(f"!!! Error loading font: {e}")
+        return False
 
     # Dynamic Sizing
     font_size = s["size"]
