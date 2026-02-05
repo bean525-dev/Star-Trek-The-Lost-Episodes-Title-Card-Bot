@@ -8,12 +8,12 @@ from PIL import Image, ImageDraw, ImageFont
 def create_card(series, title):
     styles = {
         "TOS": {
-            "font": "fonts/TOS_Title.ttf", 
+            "font": "fonts/TOS_Title.ttf", # ENSURE THIS MATCHES FILENAME EXACTLY
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
-            "size": 100, "x_pos": 0.5, "y_pos": 0.35,
-            "align": "center", "anchor": "mm", "wrap": 12
+            "size": 90, "x_pos": 0.15, "y_pos": 0.20,
+            "align": "left", "anchor": "la", "wrap": 12
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
@@ -103,11 +103,22 @@ def create_card(series, title):
             img.paste(line_grad, (0, 0), line_mask)
             current_y += (y_end - y_start) + line_spacing
     else:
-        # Solid Color path
-        draw.multiline_text(target_xy, wrapped_text, font=font, fill=s["color"], anchor=s["anchor"], align=s["align"], spacing=5)
-
-    img.convert("RGB").save("output.png")
-    return True
+        # Solid Color path (TOS and TNG)
+        if series == "TOS":
+            lines = wrapped_text.split('\n')
+            curr_x, curr_y = target_xy
+            for i, line in enumerate(lines):
+                # This creates the "Assignment: Earth" staircase effect
+                line_x = curr_x + (i * 100) 
+                # Shadow first
+                draw.text((line_x + 5, curr_y + 5), line, font=font, fill="black", anchor=s["anchor"])
+                # Then text
+                draw.text((line_x, curr_y), line, font=font, fill=s["color"], anchor=s["anchor"])
+                # Move down for next line
+                curr_y += font_size + 15
+        else:
+            # Standard path for TNG
+            draw.multiline_text(target_xy, wrapped_text, font=font, fill=s["color"], anchor=s["anchor"], align=s["align"], spacing=5)
 
 def main():
     client = Client()
