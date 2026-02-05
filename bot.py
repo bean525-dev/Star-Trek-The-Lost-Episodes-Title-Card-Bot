@@ -13,9 +13,10 @@ def create_card(series, title):
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
             "size": 100, 
-            "x_start": 0.15, "y_start": 0.25, # Starting percentage of image
-            "indent_px": 80,                  # Pixels to shift right per line
-            "line_spacing": 20                # Extra gap between lines
+            "x_start": 0.12, "y_start": 0.20, # Higher and further left to start
+            "indent_px": 250,                  # Large shift right for the second line
+            "line_spacing": 40,               # Space between the two blocks
+            "wrap_width": 15                  # Characters per line
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
@@ -51,9 +52,9 @@ def create_card(series, title):
         img = Image.open(s["bg"]).convert("RGBA")
     except FileNotFoundError: return False
 
-    # Dynamic Sizing for long titles
+    # Dynamic Sizing
     font_size = s["size"]
-    if len(quoted_title) > 20: font_size = int(s["size"] * 0.75)
+    if len(quoted_title) > 25: font_size = int(s["size"] * 0.70)
     
     try:
         font = ImageFont.truetype(s["font"], font_size)
@@ -65,23 +66,22 @@ def create_card(series, title):
     # --- DRAWING PHASE ---
 
     if series == "TOS":
-        # Split into words to create the staggered "Assignment: Earth" effect
-        words = quoted_title.split()
+        # Wrap into 2 or 3 lines max
+        wrapped_lines = textwrap.wrap(quoted_title, width=s["wrap_width"])
         current_x = W * s["x_start"]
         current_y = H * s["y_start"]
         
-        for word in words:
-            # Draw Shadow first
-            draw.text((current_x + 4, current_y + 4), word, font=font, fill="black", anchor="la")
+        for line in wrapped_lines:
+            # Draw Shadow
+            draw.text((current_x + 5, current_y + 5), line, font=font, fill="black", anchor="la")
             # Draw Main Text
-            draw.text((current_x, current_y), word, font=font, fill=s["color"], anchor="la")
+            draw.text((current_x, current_y), line, font=font, fill=s["color"], anchor="la")
             
-            # Calculate height of the word we just drew to move down for the next one
-            bbox = draw.textbbox((current_x, current_y), word, font=font, anchor="la")
-            word_height = bbox[3] - bbox[1]
+            # Get height of this line to move down for the next one
+            bbox = draw.textbbox((current_x, current_y), line, font=font, anchor="la")
+            line_height = bbox[3] - bbox[1]
             
-            # Increment positions for the "staircase" look
-            current_y += word_height + s["line_spacing"]
+            current_y += line_height + s["line_spacing"]
             current_x += s["indent_px"]
             
     elif "top_color" in s: # DS9 / VOY Gradient Logic
@@ -131,7 +131,6 @@ def main():
 
     for feed_view in response.feed:
         text = feed_view.post.record.text
-        # Matches: Lost TOS Episode: "The Corbomite Maneuver"
         match = re.search(r"Lost (\w+) Episode: \"(.+)\"", text)
         if match:
             series, title = match.group(1), match.group(2)
