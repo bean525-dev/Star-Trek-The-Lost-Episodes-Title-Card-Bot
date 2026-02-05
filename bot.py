@@ -12,8 +12,8 @@ def create_card(series, title):
             "bg": "templates/TOS_bg.jpg", 
             "color": "yellow", 
             "shadow": True, "shadow_color": "black",
-            "size": 90, "x_pos": 0.20, "y_pos": 0.20,
-            "align": "left", "anchor": "la", "wrap": 12
+            "size": 100, "x_pos": 0.5, "y_pos": 0.35,
+            "align": "center", "anchor": "mm", "wrap": 12
         },
         "DS9": {
             "font": "fonts/handel.ttf", 
@@ -51,8 +51,7 @@ def create_card(series, title):
 
     # Dynamic Sizing
     font_size = s["size"]
-    if len(quoted_title) > 20 and series != "TOS": 
-        font_size = int(s["size"] * 0.75)
+    if len(quoted_title) > 20: font_size = int(s["size"] * 0.75)
     
     try:
         font = ImageFont.truetype(s["font"], font_size)
@@ -65,24 +64,26 @@ def create_card(series, title):
 
     # --- DRAWING PHASE ---
 
-    # 1. Draw Shadow (Skip for TOS, handled in stagger loop)
-    if s.get("shadow", False) and series != "TOS":
+    # 1. Draw Shadow (TOS only)
+    if s.get("shadow", False):
         sha_color = s.get("shadow_color", "black")
         draw.multiline_text((target_xy[0]+3, target_xy[1]+3), wrapped_text, font=font, fill=sha_color, anchor=s["anchor"], align=s["align"], spacing=5)
 
-    # 2. Draw Text
+    # 2. Draw Text (Line-by-line Gradient for DS9/VOY)
     if "top_color" in s:
-        # Gradient path for DS9/VOY
         lines = wrapped_text.split('\n')
         current_y = target_xy[1]
         line_spacing = 8 
 
         for line in lines:
+            # Create mask for this specific line
             line_mask = Image.new("L", (W, H), 0)
             line_draw = ImageDraw.Draw(line_mask)
             line_draw.text((target_xy[0], current_y), line, font=font, fill=255, anchor=s["anchor"])
             
             bbox = line_draw.textbbox((target_xy[0], current_y), line, font=font, anchor=s["anchor"])
+            
+            # Create gradient for this specific line
             line_grad = Image.new("RGBA", (W, H), (0,0,0,0))
             lg_draw = ImageDraw.Draw(line_grad)
             
@@ -100,3 +101,37 @@ def create_card(series, title):
                 lg_draw.line([(bbox[0], y), (bbox[2], y)], fill=(r, g, b, 255))
 
             img.paste(line_grad, (0, 0), line_mask)
+            current_y += (y_end - y_start) + line_spacing
+    else:
+        # Solid Color path
+        draw.multiline_text(target_xy, wrapped_text, font=font, fill=s["color"], anchor=s["anchor"], align=s["align"], spacing=5)
+
+    img.convert("RGB").save("output.png")
+    return True
+
+def main():
+    client = Client()
+    client.login(os.environ['BSKY_HANDLE'], os.environ['BSKY_PASSWORD'])
+    params = {'actor': os.environ['BSKY_HANDLE'], 'limit': 5}
+    response = client.app.bsky.feed.get_author_feed(params=params)
+
+    for feed_view in response.feed:
+        text = feed_view.post.record.text
+        match = re.search(r"Lost (\w+) Episode: \"(.+)\"", text)
+        if match:
+            series, title = match.group(1), match.group(2)
+            if create_card(series, title):
+                with open("output.png", "rb") as f:
+                    img_data = f.read()
+                parent = {"cid": feed_view.post.cid, "uri": feed_view.post.uri}
+                root = feed_view.post.record.reply.root if feed_view.post.record.reply else parent
+                client.send_image(
+                    text="", image=img_data, 
+                    image_alt=f"Star Trek {series} style title card for {title}",
+                    reply_to=models.AppBskyFeedPost.ReplyRef(parent=parent, root=root)
+                )
+                break
+
+if __name__ == "__main__":
+    main()
+    
